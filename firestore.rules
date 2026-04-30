@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_ -]+$');
+    }
+
+    // Entity validations
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 256 &&
+             (!data.keys().hasAny(['displayName']) || (data.displayName == null || (data.displayName is string && data.displayName.size() <= 256))) &&
+             (!data.keys().hasAny(['photoURL']) || (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 1024))) &&
+             (!data.keys().hasAny(['theme']) || (data.theme in ['light', 'dark'])) &&
+             (!data.keys().hasAny(['fontSize']) || (data.fontSize in ['small', 'medium', 'large', 'extra-large'])) &&
+             (!data.keys().hasAny(['chatFontSize']) || (data.chatFontSize in ['small', 'medium', 'large'])) &&
+             (!data.keys().hasAny(['translation']) || (data.translation in ['almeida', 'rccv'])) &&
+             (!data.keys().hasAny(['lineSpacing']) || (data.lineSpacing in ['tight', 'relaxed', 'loose'])) &&
+             (!data.keys().hasAny(['createdAt']) || (data.createdAt is string)) &&
+             (!data.keys().hasAny(['updatedAt']) || (data.updatedAt is number)) &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidFavorite(data) {
+      return data.keys().hasAll(['userId', 'book_id', 'chapter', 'verse', 'text', 'savedAt']) &&
+             data.userId == request.auth.uid &&
+             data.book_id is string && data.book_id.size() <= 64 &&
+             data.chapter is number &&
+             data.verse is number &&
+             data.text is string && data.text.size() <= 5000 &&
+             data.savedAt is number;
+    }
+
+    function isValidHighlight(data) {
+      return data.keys().hasAll(['userId', 'book_id', 'chapter', 'verse', 'color', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             data.book_id is string && data.book_id.size() <= 64 &&
+             data.chapter is number &&
+             data.verse is number &&
+             data.color is string && data.color.size() <= 20 &&
+             data.updatedAt is number;
+    }
+
+    function isValidStudy(data) {
+      return data.keys().hasAll(['userId', 'messages', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             data.messages is list &&
+             data.updatedAt is number;
+    }
+
+    // Routes
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'theme', 'fontSize', 'chatFontSize', 'translation', 'lineSpacing', 'updatedAt']);
+
+      match /favorites/{favoriteId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(favoriteId) && isValidFavorite(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /highlights/{highlightId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(highlightId) && isValidHighlight(request.resource.data);
+        allow update: if isOwner(userId) && isValidHighlight(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /studies/{studyId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(studyId) && isValidStudy(request.resource.data);
+        allow update: if isOwner(userId) && isValidStudy(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

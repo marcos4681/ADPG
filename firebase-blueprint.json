@@ -1,0 +1,92 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "theme": { "type": "string", "enum": ["light", "dark"] },
+        "fontSize": { "type": "string", "enum": ["small", "medium", "large", "extra-large"] },
+        "chatFontSize": { "type": "string", "enum": ["small", "medium", "large"] },
+        "translation": { "type": "string", "enum": ["almeida", "rccv"] },
+        "lineSpacing": { "type": "string", "enum": ["tight", "relaxed", "loose"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Study": {
+      "title": "AI Study",
+      "description": "AI-powered study sessions and chat history",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "reference": { "type": "string" },
+        "messages": { 
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": { "type": "string", "enum": ["user", "ai"] },
+              "content": { "type": "string" },
+              "timestamp": { "type": "integer" }
+            }
+          }
+        },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["userId", "messages", "updatedAt"]
+    },
+    "Favorite": {
+      "title": "Favorite Verse",
+      "description": "A verse saved by the user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "book_id": { "type": "string" },
+        "book_name": { "type": "string" },
+        "chapter": { "type": "integer" },
+        "verse": { "type": "integer" },
+        "text": { "type": "string" },
+        "savedAt": { "type": "integer" }
+      },
+      "required": ["userId", "book_id", "chapter", "verse", "text"]
+    },
+    "Highlight": {
+      "title": "Verse Highlight",
+      "description": "A verse highlighted with a specific color",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "book_id": { "type": "string" },
+        "chapter": { "type": "integer" },
+        "verse": { "type": "integer" },
+        "color": { "type": "string" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["userId", "book_id", "chapter", "verse", "color"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Individual user documents"
+    },
+    "users/{userId}/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "User's favorite verses"
+    },
+    "users/{userId}/highlights/{highlightId}": {
+      "schema": "Highlight",
+      "description": "User's verse highlights"
+    },
+    "users/{userId}/studies/{studyId}": {
+      "schema": "Study",
+      "description": "User's AI study sessions"
+    }
+  }
+}
