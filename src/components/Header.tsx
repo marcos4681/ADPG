@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Menu, Search, Heart, Share2, User, Sun, Moon, Maximize } from 'lucide-react';
+import { Menu, Search, Heart, Share2, Settings as SettingsIcon, Sun, Moon, Maximize, Youtube, WifiOff, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Book } from '../types';
 
@@ -12,24 +12,32 @@ interface HeaderProps {
   currentBook: Book;
   currentChapter: number;
   isDarkMode: boolean;
+  isOffline?: boolean;
   onThemeToggle: () => void;
   onMenuToggle: () => void;
   onSearchToggle: () => void;
   onFavoritesToggle: () => void;
+  onStudiesToggle: () => void;
   onSettingsToggle: () => void;
   onReadingModeToggle: () => void;
+  onOpenVideoModal?: () => void;
+  isLive?: boolean;
 }
 
 export default function Header({ 
   currentBook, 
   currentChapter, 
   isDarkMode, 
+  isOffline,
   onThemeToggle, 
   onMenuToggle, 
   onSearchToggle, 
   onFavoritesToggle,
+  onStudiesToggle,
   onSettingsToggle,
-  onReadingModeToggle
+  onReadingModeToggle,
+  onOpenVideoModal,
+  isLive = false
 }: HeaderProps) {
   
   const [isCopied, setIsCopied] = React.useState(false);
@@ -67,19 +75,19 @@ export default function Header({
         </button>
         
         <div className="flex items-center gap-2">
-          <div className="px-4 py-1.5 rounded-full bg-app-bg border border-app-border text-xs font-medium text-app-accent shadow-sm">
-            {currentBook.name} {currentChapter}
-          </div>
-          <div className="px-4 py-1.5 rounded-full bg-app-bg border border-app-border text-xs font-medium text-app-accent shadow-sm hidden sm:block">
-            {currentBook.testament} Testamento
-          </div>
+          {isOffline && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-600 uppercase tracking-widest shadow-sm">
+              <WifiOff size={10} />
+              Offline
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex items-center gap-1 sm:gap-6">
         <button
           onClick={onThemeToggle}
-          className="p-2 text-app-taupe hover:text-app-accent transition-colors"
+          className="p-3 sm:p-2 text-app-taupe hover:text-app-accent transition-colors"
           title={isDarkMode ? "Modo Claro" : "Modo Escuro"}
           id="theme-toggle"
         >
@@ -101,6 +109,14 @@ export default function Header({
           id="fav-btn"
         >
           <Heart size={22} />
+        </button>
+        <button
+          onClick={onStudiesToggle}
+          className="p-1 text-app-taupe hover:text-app-accent transition-colors hidden sm:block"
+          title="Estudos Bíblicos"
+          id="studies-btn"
+        >
+          <BookOpen size={22} />
         </button>
         <div className="relative">
           <button
@@ -125,6 +141,18 @@ export default function Header({
           </AnimatePresence>
         </div>
         <button
+          onClick={onOpenVideoModal}
+          className={`p-1.5 rounded-lg transition-all ${
+            isLive 
+              ? 'text-red-600 bg-red-600/10 border border-red-600/20' 
+              : 'text-app-taupe hover:text-red-600'
+          }`}
+          title="TVADPG"
+          id="youtube-header-btn"
+        >
+          <Youtube size={20} />
+        </button>
+        <button
           onClick={onReadingModeToggle}
           className="p-1 text-app-taupe hover:text-app-accent transition-colors"
           title="Modo Leitura"
@@ -138,7 +166,7 @@ export default function Header({
           title="Configurações"
           id="profile-btn"
         >
-          <User size={22} />
+          <SettingsIcon size={22} />
         </button>
       </div>
     </header>

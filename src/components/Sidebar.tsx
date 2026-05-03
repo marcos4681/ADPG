@@ -5,10 +5,11 @@
 
 import { Book } from '../types';
 import { PROTESTANT_BOOKS } from '../constants';
-import { ChevronRight, ChevronDown, BookOpen, LogOut, LogIn, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronRight, ChevronDown, ChevronLeft, BookOpen, LogOut, LogIn, Clock, Youtube, Facebook, Instagram, Radio, Bell, Play, Pause } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from './AuthProvider';
+import Logo from './Logo';
 
 interface SidebarProps {
   currentBook: Book;
@@ -17,12 +18,34 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenLogin: () => void;
+  onStudiesToggle?: () => void;
+  onOpenVideoModal?: () => void;
+  isLive?: boolean;
+  onTestamentClick?: (testament: 'Antigo' | 'Novo') => void;
 }
 
-export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin }: SidebarProps) {
+export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onStudiesToggle, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
-  const [expandedTestament, setExpandedTestament] = useState<'Antigo' | 'Novo' | null>('Antigo');
-  const [selectedBookId, setSelectedBookId] = useState<string | null>(currentBook.id);
+  const [isPlayingRadio, setIsPlayingRadio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const toggleRadio = () => {
+    if (audioRef.current) {
+      if (isPlayingRadio) {
+        audioRef.current.pause();
+        setIsPlayingRadio(false);
+      } else {
+        // Reset the source to ensure we're playing the live stream from now
+        audioRef.current.load();
+        audioRef.current.play().then(() => {
+          setIsPlayingRadio(true);
+        }).catch(err => {
+          console.error("Error playing radio:", err);
+          setIsPlayingRadio(false);
+        });
+      }
+    }
+  };
 
   const testaments = ['Antigo', 'Novo'] as const;
 
@@ -33,9 +56,27 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
       }`}
     >
       <div className="h-full flex flex-col w-72">
-        <div className="p-6 flex flex-col gap-1">
-          <h1 className="text-2xl font-serif font-bold text-app-accent tracking-tight">ADPG</h1>
-          <p className="text-[10px] uppercase tracking-widest text-app-taupe">Bíblia Digital</p>
+        <div className="p-4 flex items-start justify-between relative">
+          <div className="flex flex-col w-full pr-8">
+            <img 
+              src="/logo.png" 
+              alt="Assembleia de Deus Jardim Melvi" 
+              className="w-full max-h-28 object-contain mb-4 drop-shadow-md hover:drop-shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                document.getElementById('text-logo')!.style.display = 'flex';
+              }} 
+            />
+            <div id="text-logo" className="w-full flex-col items-center" style={{ display: 'none' }}>
+              <Logo />
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="lg:hidden absolute top-4 right-4 p-2 text-app-taupe hover:text-app-accent hover:bg-white/5 rounded-full transition-colors z-50"
+          >
+            <ChevronLeft size={24} />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
@@ -43,84 +84,136 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
           {testaments.map((testament) => (
             <div key={testament} className="space-y-1">
               <button
-                onClick={() => setExpandedTestament(expandedTestament === testament ? null : testament)}
-                className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-app-taupe uppercase tracking-widest hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors"
+                onClick={() => onTestamentClick?.(testament as 'Antigo' | 'Novo')}
+                className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-app-taupe uppercase tracking-widest hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors border border-app-border"
                 id={`testament-btn-${testament}`}
               >
                 {testament} Testamento
-                {expandedTestament === testament ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <ChevronRight size={14} />
               </button>
-
-              <AnimatePresence>
-                {expandedTestament === testament && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden space-y-0.5 mt-2"
-                  >
-                    {PROTESTANT_BOOKS.filter((b) => b.testament === testament).map((book) => (
-                      <div key={book.id}>
-                        <button
-                          onClick={() => setSelectedBookId(selectedBookId === book.id ? null : book.id)}
-                          className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all ${
-                            currentBook.id === book.id
-                              ? 'bg-app-bg shadow-sm text-app-accent font-semibold border border-app-border'
-                              : 'text-app-text/70 hover:bg-white/50 dark:hover:bg-white/5'
-                          }`}
-                          id={`book-btn-${book.id}`}
-                        >
-                          {book.name}
-                          {selectedBookId === book.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                        </button>
-
-                        <AnimatePresence>
-                          {selectedBookId === book.id && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="p-3 bg-white/30 dark:bg-black/10 rounded-lg mt-1 mx-1 flex flex-col gap-2"
-                            >
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedBookId(null);
-                                }}
-                                className="text-[10px] uppercase font-bold text-app-accent flex items-center gap-1 hover:underline mb-1"
-                              >
-                                <ChevronRight size={10} className="rotate-180" />
-                                Voltar para livros
-                              </button>
-                              <div className="grid grid-cols-5 gap-1.5">
-                                {Array.from({ length: book.chapters }, (_, i) => i + 1).map((ch) => (
-                                  <button
-                                    key={ch}
-                                    onClick={() => {
-                                      onSelect(book, ch);
-                                      if (window.innerWidth < 1024) onClose();
-                                    }}
-                                    className={`aspect-square flex items-center justify-center text-xs rounded-md border transition-all ${
-                                      currentBook.id === book.id && currentChapter === ch
-                                        ? 'bg-app-accent text-white border-app-accent shadow-sm'
-                                        : 'bg-app-bg text-app-taupe border-app-border hover:border-app-accent hover:text-app-accent'
-                                    }`}
-                                    id={`chapter-btn-${book.id}-${ch}`}
-                                  >
-                                    {ch}
-                                  </button>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
           ))}
+        </div>
+
+        <div className="px-4 pb-4 space-y-5">
+          {/* Estudos */}
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">Recursos</p>
+            <button
+              onClick={() => {
+                onStudiesToggle?.();
+                if (window.innerWidth < 1024) onClose();
+              }}
+              className="w-full flex items-center justify-between p-3 bg-app-accent/10 hover:bg-app-accent/20 text-app-accent rounded-xl transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-app-accent text-white p-1.5 rounded-lg shadow-sm">
+                  <BookOpen size={16} />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-xs font-bold leading-tight">Estudos Bíblicos</span>
+                  <span className="text-[10px] opacity-70">Aprofunde-se na Palavra</span>
+                </div>
+              </div>
+              <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          {/* Mídia & Ao Vivo */}
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">TV & Rádio</p>
+            
+            {/* TV ADPG Group */}
+            <div className="flex flex-col gap-1 bg-red-600/5 border border-red-600/20 rounded-xl p-1.5">
+              <button
+                onClick={onOpenVideoModal}
+                className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all group ${
+                  isLive 
+                    ? 'bg-red-600/20 text-red-600' 
+                    : 'hover:bg-red-600/10 text-red-600'
+                }`}
+                id="sidebar-youtube-btn"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-600 text-white p-1.5 rounded-md shadow-sm">
+                    <Youtube size={16} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold leading-tight">TV ADPG</span>
+                    <span className="text-[10px] opacity-70 border border-red-500/30 rounded px-1 w-fit mt-0.5">Assistir Vídeos</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            </div>
+
+            {/* Radio Group */}
+            <div className="flex flex-col gap-1 bg-orange-500/5 border border-orange-500/20 rounded-xl p-1.5 mt-2">
+              <audio ref={audioRef} src="https://stm4.audiplushd.com.br:7728/stream" preload="none" />
+              <button
+                onClick={toggleRadio}
+                className="w-full flex items-center justify-between p-2.5 hover:bg-orange-500/10 text-orange-600 rounded-lg transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`bg-orange-500 text-white p-1.5 rounded-md transition-all ${isPlayingRadio ? 'scale-110 shadow-lg shadow-orange-500/30' : ''}`}>
+                    {isPlayingRadio ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold leading-tight">Rádio Delta Fly</span>
+                    <span className="text-[10px] opacity-70 border border-orange-500/30 rounded px-1 w-fit mt-0.5">{isPlayingRadio ? 'Tocando...' : 'Ouvir Agora'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                   <span className="text-[8px] bg-orange-600 text-white px-1 rounded uppercase animate-pulse">Ao Vivo</span>
+                </div>
+              </button>
+              
+              <a
+                href="https://player.audiplushd.com.br/player-app-multi-plataforma/7728"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-between p-2.5 hover:bg-black/5 dark:hover:bg-white/5 text-app-text/70 hover:text-app-text rounded-lg transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-app-taupe/20 text-app-taupe p-1.5 rounded-md group-hover:bg-app-taupe group-hover:text-white transition-colors">
+                    <Clock size={14} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-[10px] font-bold leading-tight">APP da Rádio</span>
+                    <span className="text-[8px] opacity-70">Multi-plataforma</span>
+                  </div>
+                </div>
+                <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform opacity-50 group-hover:opacity-100" />
+              </a>
+            </div>
+          </div>
+
+          {/* Redes Sociais */}
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">Redes Sociais</p>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href="https://facebook.com/tvadpg.tvadpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 rounded-xl transition-all text-xs font-bold"
+              >
+                <Facebook size={14} />
+                Facebook
+              </a>
+              <a
+                href="https://instagram.com/tvadpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2.5 bg-pink-600/10 hover:bg-pink-600/20 text-pink-600 rounded-xl transition-all text-xs font-bold"
+              >
+                <Instagram size={14} />
+                Instagram
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 border-t border-app-border bg-app-sidebar">

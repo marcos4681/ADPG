@@ -14,16 +14,26 @@ import { db } from './lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import SearchModal from './components/SearchModal';
 import SettingsModal from './components/SettingsModal';
+import StudiesModal from './components/StudiesModal';
+import DictionaryModal from './components/DictionaryModal';
+import QuickSelectorModal from './components/QuickSelectorModal';
+import VideoModal from './components/VideoModal';
 import { Book, Verse, FavoriteVerse, Highlight, Settings } from './types';
 import { PROTESTANT_BOOKS } from './constants';
-import { fetchChapter } from './services/bibleService';
-import { Bookmark, X, Star, Type, Maximize } from 'lucide-react';
+import { fetchChapter, fetchChapterTitle } from './services/bibleService';
+import { Bookmark, X, Star, Type, Maximize, ZoomIn, ZoomOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
   const { user } = useAuth();
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('bible_theme');
+    if (saved === 'dark' || saved === 'light') return saved as 'light' | 'dark';
+    return 'light';
+  });
   const [currentBook, setCurrentBook] = useState<Book>(PROTESTANT_BOOKS[0]);
   const [currentChapter, setCurrentChapter] = useState(1);
+  const [chapterTitle, setChapterTitle] = useState<string>('');
   const [verses, setVerses] = useState<Verse[]>([]);
   const [favorites, setFavorites] = useState<FavoriteVerse[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
@@ -31,10 +41,16 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isStudiesModalOpen, setIsStudiesModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isReadingMode, setIsReadingMode] = useState(false);
+  const [isQuickSelectorOpen, setIsQuickSelectorOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [selectedTestamentFilter, setSelectedTestamentFilter] = useState<'Antigo' | 'Novo' | null>(null);
+  const [dictionaryWord, setDictionaryWord] = useState<string | null>(null);
+  const [dictionaryContext, setDictionaryContext] = useState<string | undefined>(undefined);
   const [settings, setSettings] = useState<Settings>(() => {
     const saved = localStorage.getItem('bible_settings');
     const defaultSettings: Settings = {
@@ -42,14 +58,16 @@ export default function App() {
       chatFontSize: 'medium',
       theme: localStorage.getItem('bible_theme') === 'dark' ? 'dark' : 'light',
       translation: 'almeida',
-      lineSpacing: 'relaxed'
+      lineSpacing: 'relaxed',
+      fontFamily: 'serif',
+      textColor: 'default'
     };
     
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         // Validar tradução para evitar erros de versões não suportadas no passado
-        if (!['almeida', 'rccv'].includes(parsed.translation)) {
+        if (!['almeida', 'rccv', 'mnpg', 'blivre', 'adpg'].includes(parsed.translation)) {
           parsed.translation = 'almeida';
         }
         // Ensure chatFontSize is set
@@ -63,7 +81,26 @@ export default function App() {
     }
     return defaultSettings;
   });
-  const [isDarkMode, setIsDarkMode] = useState(settings.theme === 'dark');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const isDarkMode = theme === 'dark';
+
+  // Update theme when settings.theme changes (from cloud or settings modal)
+  useEffect(() => {
+    if (settings.theme !== theme) {
+      setTheme(settings.theme);
+    }
+  }, [settings.theme]);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Load user settings from Firestore if available
   useEffect(() => {
@@ -79,7 +116,9 @@ export default function App() {
               (userData.chatFontSize && userData.chatFontSize !== current.chatFontSize) ||
               (userData.theme && userData.theme !== current.theme) ||
               (userData.lineSpacing && userData.lineSpacing !== current.lineSpacing) ||
-              (userData.translation && userData.translation !== current.translation);
+              (userData.translation && userData.translation !== current.translation) ||
+              (userData.fontFamily && userData.fontFamily !== current.fontFamily) ||
+              (userData.textColor && userData.textColor !== current.textColor);
 
             if (needsUpdate) {
               return {
@@ -88,7 +127,9 @@ export default function App() {
                 chatFontSize: userData.chatFontSize || current.chatFontSize,
                 theme: userData.theme || current.theme,
                 lineSpacing: userData.lineSpacing || current.lineSpacing,
-                translation: userData.translation || current.translation
+                translation: userData.translation || current.translation,
+                fontFamily: userData.fontFamily || current.fontFamily,
+                textColor: userData.textColor || current.textColor
               };
             }
             return current;
@@ -105,17 +146,22 @@ export default function App() {
   // Update logic when settings change
   useEffect(() => {
     localStorage.setItem('bible_settings', JSON.stringify(settings));
-    setIsDarkMode(settings.theme === 'dark');
     
     // Sync to Firestore if logged in
     if (user) {
       const userRef = doc(db, 'users', user.uid);
       setDoc(userRef, {
+        uid: user.uid,
+        email: user.email || null,
+        displayName: user.displayName || null,
+        photoURL: user.photoURL || null,
         fontSize: settings.fontSize,
         chatFontSize: settings.chatFontSize,
         theme: settings.theme,
         lineSpacing: settings.lineSpacing,
         translation: settings.translation,
+        fontFamily: settings.fontFamily || 'serif',
+        textColor: settings.textColor || 'default',
         updatedAt: Date.now()
       }, { merge: true }).catch(err => {
         console.error('Error syncing settings to Firestore:', err);
@@ -126,13 +172,31 @@ export default function App() {
 
   // Sync theme with local storage and DOM
   useEffect(() => {
-    localStorage.setItem('bible_theme', isDarkMode ? 'dark' : 'light');
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
+    const isDark = theme === 'dark';
+    localStorage.setItem('bible_theme', theme);
+    
+    // Force a re-render cycle for class application
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add('dark');
+      root.style.colorScheme = 'dark';
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
+      root.style.colorScheme = 'light';
     }
-  }, [isDarkMode]);
+
+    // Update settings to keep in sync
+    setSettings(prev => prev.theme !== theme ? { ...prev, theme } : prev);
+
+    // Update theme-color meta tag for mobile browser UI
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', isDark ? '#121212' : '#fdfcf8');
+  }, [theme]);
   
   // Reading mode escape shortcut
   useEffect(() => {
@@ -216,8 +280,12 @@ export default function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchChapter(book.api_id, chapter, settings.translation);
-      setVerses(data);
+      const [chapterVerses, title] = await Promise.all([
+        fetchChapter(book.api_id, chapter, settings.translation),
+        fetchChapterTitle(book.name, chapter)
+      ]);
+      setVerses(chapterVerses);
+      setChapterTitle(title);
       setCurrentBook(book);
       setCurrentChapter(chapter);
     } catch (err) {
@@ -335,6 +403,40 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    // Check for notification permission and handle live alerts
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        // Here we could add a real check using the YouTube API or an RSS feed
+        // For demonstration, we'll log the setup
+        console.log("Notification system ready for TV ADPG Live checks.");
+      }
+    }
+  }, []);
+
+  const goToNextChapter = () => {
+    const currentIndex = PROTESTANT_BOOKS.findIndex(b => b.id === currentBook.id);
+    if (currentChapter < currentBook.chapters) {
+      setCurrentChapter(prev => prev + 1);
+    } else if (currentIndex < PROTESTANT_BOOKS.length - 1) {
+      setCurrentBook(PROTESTANT_BOOKS[currentIndex + 1]);
+      setCurrentChapter(1);
+    }
+  };
+
+  const goToPrevChapter = () => {
+    const currentIndex = PROTESTANT_BOOKS.findIndex(b => b.id === currentBook.id);
+    if (currentChapter > 1) {
+      setCurrentChapter(prev => prev - 1);
+    } else if (currentIndex > 0) {
+      const prevBook = PROTESTANT_BOOKS[currentIndex - 1];
+      setCurrentBook(prevBook);
+      setCurrentChapter(prevBook.chapters);
+    }
+  };
+
+  const [isLive, setIsLive] = useState(true); // Simulated live state
+
   return (
     <div className={`flex h-screen bg-app-bg overflow-hidden transition-colors duration-300 ${isReadingMode ? 'p-0' : ''}`}>
       {!isReadingMode && (
@@ -348,6 +450,14 @@ export default function App() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           onOpenLogin={() => setIsLoginModalOpen(true)}
+          onStudiesToggle={() => setIsStudiesModalOpen(true)}
+          onOpenVideoModal={() => setIsVideoModalOpen(true)}
+          isLive={isLive}
+          onTestamentClick={(testament) => {
+            setSelectedTestamentFilter(testament);
+            setIsQuickSelectorOpen(true);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
+          }}
         />
       )}
 
@@ -357,12 +467,16 @@ export default function App() {
             currentBook={currentBook}
             currentChapter={currentChapter}
             isDarkMode={isDarkMode}
-            onThemeToggle={() => setSettings(s => ({ ...s, theme: s.theme === 'dark' ? 'light' : 'dark' }))}
+            isOffline={!isOnline}
+            onThemeToggle={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
             onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
             onSearchToggle={() => setIsSearchModalOpen(true)}
             onFavoritesToggle={() => setIsFavoritesOpen(true)}
+            onStudiesToggle={() => setIsStudiesModalOpen(true)}
             onSettingsToggle={() => setIsSettingsModalOpen(true)}
             onReadingModeToggle={() => setIsReadingMode(true)}
+            onOpenVideoModal={() => setIsVideoModalOpen(true)}
+            isLive={isLive}
           />
         )}
 
@@ -370,13 +484,29 @@ export default function App() {
           {isReadingMode && (
             <div className="absolute top-0 right-0 p-4 z-40 flex gap-2">
               <button 
-                onClick={() => setIsSettingsModalOpen(true)}
+                onClick={() => setSettings(prev => {
+                  const sizes: ('small' | 'medium' | 'large' | 'extra-large')[] = ['small', 'medium', 'large', 'extra-large'];
+                  const currentIndex = sizes.indexOf(prev.fontSize);
+                  return { ...prev, fontSize: sizes[Math.max(0, currentIndex - 1)] };
+                })}
                 className="p-2 bg-app-bg/80 backdrop-blur border border-app-border rounded-full text-app-taupe hover:text-app-accent shadow-lg transition-all"
-                title="Configurações"
+                title="Diminuir fonte"
               >
                 <div className="flex items-center gap-2 px-2">
-                  <Type size={16} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Ajustes</span>
+                  <ZoomOut size={16} />
+                </div>
+              </button>
+              <button 
+                onClick={() => setSettings(prev => {
+                  const sizes: ('small' | 'medium' | 'large' | 'extra-large')[] = ['small', 'medium', 'large', 'extra-large'];
+                  const currentIndex = sizes.indexOf(prev.fontSize);
+                  return { ...prev, fontSize: sizes[Math.min(sizes.length - 1, currentIndex + 1)] };
+                })}
+                className="p-2 bg-app-bg/80 backdrop-blur border border-app-border rounded-full text-app-taupe hover:text-app-accent shadow-lg transition-all"
+                title="Aumentar fonte"
+              >
+                <div className="flex items-center gap-2 px-2">
+                  <ZoomIn size={16} />
                 </div>
               </button>
               <button 
@@ -394,13 +524,27 @@ export default function App() {
             highlights={highlights}
             isLoading={isLoading}
             error={error}
+            chapterTitle={chapterTitle}
             fontSize={settings.fontSize}
             lineSpacing={settings.lineSpacing}
+            fontFamily={settings.fontFamily}
+            textColor={settings.textColor}
+            translation={settings.translation}
+            onUpdateFontSize={(size) => setSettings(prev => ({ ...prev, fontSize: size }))}
             onExplain={handleExplain}
             onToggleFavorite={toggleFavorite}
             onToggleHighlight={toggleHighlight}
             isFavorite={isFavorite}
             onRetry={() => loadChapter(currentBook, currentChapter)}
+            currentBook={currentBook}
+            currentChapter={currentChapter}
+            onNextChapter={goToNextChapter}
+            onPrevChapter={goToPrevChapter}
+            onOpenQuickSelector={() => setIsQuickSelectorOpen(true)}
+            onWordSelect={(word, context) => {
+              setDictionaryWord(word);
+              setDictionaryContext(context);
+            }}
           />
         </main>
       </div>
@@ -430,6 +574,41 @@ export default function App() {
         settings={settings}
         onUpdateSettings={(updated) => setSettings(s => ({ ...s, ...updated }))}
         onReadingModeToggle={() => setIsReadingMode(true)}
+      />
+
+      <QuickSelectorModal
+        isOpen={isQuickSelectorOpen}
+        onClose={() => {
+          setIsQuickSelectorOpen(false);
+          setSelectedTestamentFilter(null);
+        }}
+        onSelect={(b, c) => {
+          setCurrentBook(b);
+          setCurrentChapter(c);
+          setSelectedTestamentFilter(null);
+        }}
+        currentBook={currentBook}
+        currentChapter={currentChapter}
+        testamentFilter={selectedTestamentFilter}
+      />
+
+      <StudiesModal
+        isOpen={isStudiesModalOpen}
+        onClose={() => setIsStudiesModalOpen(false)}
+      />
+
+      <DictionaryModal
+        word={dictionaryWord}
+        context={dictionaryContext}
+        onClose={() => {
+          setDictionaryWord(null);
+          setDictionaryContext(undefined);
+        }}
+      />
+
+      <VideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
       />
 
       {/* Favorites Sidebar/Drawer */}

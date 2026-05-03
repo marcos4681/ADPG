@@ -12,8 +12,10 @@
         "theme": { "type": "string", "enum": ["light", "dark"] },
         "fontSize": { "type": "string", "enum": ["small", "medium", "large", "extra-large"] },
         "chatFontSize": { "type": "string", "enum": ["small", "medium", "large"] },
-        "translation": { "type": "string", "enum": ["almeida", "rccv"] },
+        "translation": { "type": "string", "enum": ["almeida", "rccv", "mnpg"] },
         "lineSpacing": { "type": "string", "enum": ["tight", "relaxed", "loose"] },
+        "fontFamily": { "type": "string", "enum": ["sans", "serif", "mono"] },
+        "textColor": { "type": "string", "enum": ["default", "blue", "rose", "emerald", "amber", "purple"] },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "integer" }
       },

@@ -31,7 +31,7 @@
     --taupe: #8a857c;
   }
 
-  .dark {
+  :root.dark {
     --bg: #121212;
     --text: #e0e0e0;
     --sidebar: #1a1a1a;
@@ -43,8 +43,27 @@
   body {
     @apply bg-[var(--bg)] text-[var(--text)] font-sans antialiased transition-colors duration-300;
   }
+}
 
-  .bible-text {
-    @apply font-serif text-xl leading-relaxed text-[var(--text)] transition-colors duration-300;
+@layer utilities {
+  @keyframes live-pulse {
+    0% {
+      background-color: rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+    }
+    50% {
+      background-color: rgba(239, 68, 68, 0.4);
+      box-shadow: 0 0 20px 8px rgba(239, 68, 68, 0.4);
+    }
+    100% {
+      background-color: rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+    }
+  }
+
+  .animate-live-pulse {
+    animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
+
+

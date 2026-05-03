@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Type, Sun, Moon, Languages, Sparkles, Maximize } from 'lucide-react';
+import { X, Type, Sun, Moon, Languages, Sparkles, Maximize, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings } from '../types';
 
@@ -45,6 +45,59 @@ export default function SettingsModal({ isOpen, onClose, settings, onUpdateSetti
           </div>
 
           <div className="p-6 space-y-8 overflow-y-auto flex-1">
+            {/* Texto Bíblico: Família e Cor */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-app-taupe mb-2">
+                <Palette size={16} className="text-app-accent" />
+                <span className="text-xs font-bold uppercase tracking-widest">Aparência do Texto</span>
+              </div>
+              
+              {/* Família da Fonte */}
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'sans', label: 'Moderna', class: 'font-sans' },
+                  { id: 'serif', label: 'Clássica', class: 'font-serif' },
+                  { id: 'mono', label: 'Máquina', class: 'font-mono' }
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => onUpdateSettings({ fontFamily: f.id as any })}
+                    className={`h-12 rounded-xl border-2 flex items-center justify-center transition-all ${
+                      (settings.fontFamily || 'serif') === f.id
+                        ? 'border-app-accent bg-app-accent/10 text-app-accent font-bold'
+                        : 'border-app-border text-app-taupe hover:border-app-accent/50'
+                    }`}
+                  >
+                    <span className={`text-sm ${f.class}`}>{f.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Cor da Fonte */}
+              <div className="grid grid-cols-6 gap-2 mt-2">
+                {[
+                  { id: 'default', color: 'bg-app-text', border: 'border-app-text' },
+                  { id: 'blue', color: 'bg-blue-600', border: 'border-blue-600' },
+                  { id: 'rose', color: 'bg-rose-600', border: 'border-rose-600' },
+                  { id: 'emerald', color: 'bg-emerald-600', border: 'border-emerald-600' },
+                  { id: 'amber', color: 'bg-amber-600', border: 'border-amber-600' },
+                  { id: 'purple', color: 'bg-purple-600', border: 'border-purple-600' },
+                ].map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => onUpdateSettings({ textColor: c.id as any })}
+                    className={`h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+                      (settings.textColor || 'default') === c.id
+                        ? 'border-app-accent ring-2 ring-app-accent ring-offset-2 ring-offset-app-bg'
+                        : 'border-transparent hover:scale-110'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-full ${c.color} shadow-sm border border-black/10 dark:border-white/10`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Bible Font Size */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-app-taupe mb-2">
@@ -197,7 +250,10 @@ export default function SettingsModal({ isOpen, onClose, settings, onUpdateSetti
               <div className="space-y-2">
                 {[
                   { id: 'almeida', label: 'Almeida (Tradicional)' },
-                  { id: 'rccv', label: 'Almeida Revista e Corrigida (ARC)' }
+                  { id: 'rccv', label: 'Almeida Revista e Corrigida (ARC)' },
+                  { id: 'mnpg', label: 'MNPG (Fiel aos Originais)', badge: 'Exclusiva' },
+                  { id: 'blivre', label: 'Bíblia Livre' },
+                  { id: 'adpg', label: 'Tradução ADPG (IA - Linguagem Atual)', badge: 'Nova' }
                 ].map((tr) => (
                   <button
                     key={tr.id}
@@ -209,7 +265,14 @@ export default function SettingsModal({ isOpen, onClose, settings, onUpdateSetti
                     }`}
                   >
                     <div className="flex flex-col items-start">
-                      <span>{tr.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{tr.label}</span>
+                        {tr.badge && (
+                          <span className="text-[8px] bg-app-accent text-white px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
+                            {tr.badge}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {settings.translation === tr.id && (
                       <div className="w-2 h-2 rounded-full bg-app-accent" />

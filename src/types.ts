@@ -32,11 +32,20 @@ export interface Highlight {
   updatedAt: number;
 }
 
+export interface WordDefinition {
+  word: string;
+  originalWord?: string;
+  meaning: string;
+  context: string;
+}
+
 export interface Settings {
   fontSize: 'small' | 'medium' | 'large' | 'extra-large';
   chatFontSize: 'small' | 'medium' | 'large';
   theme: 'dark' | 'light';
-  translation: 'almeida' | 'rccv';
+  translation: 'almeida' | 'rccv' | 'mnpg' | 'blivre' | 'adpg';
   lineSpacing: 'tight' | 'relaxed' | 'loose';
+  fontFamily?: 'sans' | 'serif' | 'mono';
+  textColor?: 'default' | 'blue' | 'rose' | 'emerald' | 'amber' | 'purple';
 }
 
