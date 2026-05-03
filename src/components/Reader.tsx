@@ -482,7 +482,7 @@ export default function Reader({
 
       <AnimatePresence>
         {showBackToTop && (
-          <div className="fixed bottom-6 right-24 flex flex-col gap-2 z-40">
+          <div className="fixed bottom-6 right-4 sm:right-6 md:right-8 flex flex-col gap-2 z-40">
             <div className="flex flex-col bg-app-bg border border-app-border rounded-full shadow-lg overflow-hidden">
               <button
                 onClick={handleZoomIn}
