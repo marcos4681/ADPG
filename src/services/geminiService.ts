@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type, Schema } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -65,12 +65,29 @@ ${versesText}
 
 Responda APENAS com o JSON modificado, sem blocos de código ou markdown extra.`;
 
+  const responseSchema: Schema = {
+    type: Type.ARRAY,
+    items: {
+      type: Type.OBJECT,
+      properties: {
+        verse: { type: Type.INTEGER },
+        text: { type: Type.STRING }
+      },
+      required: ["verse", "text"]
+    }
+  };
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview", // Use consistent flash model
       contents: [{ parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+        maxOutputTokens: 8192
+      }
     });
-    return response.text;
+    return response.text || "[]";
   } catch (error) {
     console.error("Erro ao chamar Gemini na tradução:", error);
     throw error;

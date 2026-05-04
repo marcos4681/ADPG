@@ -19,13 +19,14 @@ interface SidebarProps {
   onClose: () => void;
   onOpenLogin: () => void;
   onStudiesToggle?: () => void;
-  onNoticesToggle?: () => void;
+  onGoHome?: () => void;
+  onGoBible?: () => void;
   onOpenVideoModal?: () => void;
   isLive?: boolean;
   onTestamentClick?: (testament: 'Antigo' | 'Novo') => void;
 }
 
-export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onStudiesToggle, onNoticesToggle, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
+export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onStudiesToggle, onGoHome, onGoBible, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -80,23 +81,7 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
-          {/* Testament Selectors */}
-          {testaments.map((testament) => (
-            <div key={testament} className="space-y-1">
-              <button
-                onClick={() => onTestamentClick?.(testament as 'Antigo' | 'Novo')}
-                className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-app-taupe uppercase tracking-widest hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-colors border border-app-border"
-                id={`testament-btn-${testament}`}
-              >
-                {testament} Testamento
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="px-4 pb-4 space-y-5">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
           {/* Estudos e Recursos */}
           <div className="space-y-2">
             <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">Recursos da Igreja</p>
@@ -122,7 +107,7 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
 
               <button
                 onClick={() => {
-                  onNoticesToggle?.();
+                  onGoHome?.();
                   if (window.innerWidth < 1024) onClose();
                 }}
                 className="w-full flex items-center justify-between p-3 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 rounded-xl transition-all group"
@@ -132,12 +117,32 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
                     <Bell size={16} />
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-xs font-bold leading-tight">Avisos e Eventos</span>
-                    <span className="text-[10px] opacity-70">Confira a agenda e recados</span>
+                    <span className="text-xs font-bold leading-tight">Mural de Recados, Avisos e Eventos</span>
+                    <span className="text-[10px] opacity-70">Acesse a Página Inicial</span>
                   </div>
                 </div>
                 <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
+
+              <button
+                onClick={() => {
+                  onGoBible?.();
+                  if (window.innerWidth < 1024) onClose();
+                }}
+                className="w-full flex items-center justify-between p-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 rounded-xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-500 text-white p-1.5 rounded-lg shadow-sm">
+                    <BookOpen size={16} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold leading-tight">Ler a Bíblia</span>
+                    <span className="text-[10px] opacity-70">Acesse os Capítulos</span>
+                  </div>
+                </div>
+                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+
             </div>
           </div>
 

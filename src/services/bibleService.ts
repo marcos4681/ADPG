@@ -170,11 +170,42 @@ export async function fetchChapter(bookApiId: string, chapter: number, selectedT
   if (finalVerses) {
     if (selectedTranslation === 'adpg') {
       try {
-        const jsonText = JSON.stringify(finalVerses);
-        const modernJson = await translateChapterToModern(jsonText);
-        // Extracts exactly the JSON array from response
-        const cleanedJson = modernJson.replace(/```json/i, '').replace(/```/i, '').trim();
-        finalVerses = JSON.parse(cleanedJson);
+        // Break into chunks of 30 verses to prevent LLM truncation
+        const chunkSize = 30;
+        const translatedSimplified = [];
+        
+        for (let i = 0; i < finalVerses.length; i += chunkSize) {
+          const chunk = finalVerses.slice(i, i + chunkSize);
+          const simplifiedVerses = chunk.map(v => ({ verse: v.verse, text: v.text }));
+          const jsonText = JSON.stringify(simplifiedVerses);
+          
+          const modernJson = await translateChapterToModern(jsonText);
+          let cleanedJson = modernJson.replace(/^```json/mi, '').replace(/```$/m, '').trim();
+          
+          // Fix potentially truncated JSON if array isn't closed
+          if (cleanedJson && !cleanedJson.endsWith(']')) {
+             if (cleanedJson.endsWith('}')) {
+                 cleanedJson += ']';
+             } else {
+                 // Try to gracefully recover truncated JSON
+                 const lastBrace = cleanedJson.lastIndexOf('}');
+                 if (lastBrace > -1) {
+                     cleanedJson = cleanedJson.substring(0, lastBrace + 1) + ']';
+                 } else {
+                     cleanedJson = '[]';
+                 }
+             }
+          }
+          
+          const parsedChunk = JSON.parse(cleanedJson);
+          translatedSimplified.push(...parsedChunk);
+        }
+        
+        // Reconstruct the full verses array
+        finalVerses = finalVerses.map(v => {
+          const trans = translatedSimplified.find((t: any) => t.verse === v.verse);
+          return trans ? { ...v, text: trans.text } : v;
+        });
       } catch (e) {
         console.error('Erro na tradução com IA, usando Almeida como fallback', e);
       }

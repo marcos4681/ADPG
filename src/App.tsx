@@ -15,7 +15,7 @@ import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy } from '
 import SearchModal from './components/SearchModal';
 import SettingsModal from './components/SettingsModal';
 import StudiesModal from './components/StudiesModal';
-import NoticesModal from './components/NoticesModal';
+import HomeView from './components/HomeView';
 import DictionaryModal from './components/DictionaryModal';
 import QuickSelectorModal from './components/QuickSelectorModal';
 import VideoModal from './components/VideoModal';
@@ -43,7 +43,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isStudiesModalOpen, setIsStudiesModalOpen] = useState(false);
-  const [isNoticesModalOpen, setIsNoticesModalOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'home' | 'bible'>('home');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -453,10 +453,12 @@ export default function App() {
           onClose={() => setIsSidebarOpen(false)}
           onOpenLogin={() => setIsLoginModalOpen(true)}
           onStudiesToggle={() => setIsStudiesModalOpen(true)}
-          onNoticesToggle={() => setIsNoticesModalOpen(true)}
+          onGoHome={() => setCurrentView('home')}
+          onGoBible={() => setCurrentView('bible')}
           onOpenVideoModal={() => setIsVideoModalOpen(true)}
           isLive={isLive}
           onTestamentClick={(testament) => {
+            setCurrentView('bible');
             setSelectedTestamentFilter(testament);
             setIsQuickSelectorOpen(true);
             if (window.innerWidth < 1024) setIsSidebarOpen(false);
@@ -522,8 +524,11 @@ export default function App() {
               </button>
             </div>
           )}
-          <Reader
-            verses={verses}
+          {currentView === 'home' ? (
+            <HomeView />
+          ) : (
+            <Reader
+              verses={verses}
             highlights={highlights}
             isLoading={isLoading}
             error={error}
@@ -549,6 +554,7 @@ export default function App() {
               setDictionaryContext(context);
             }}
           />
+          )}
         </main>
       </div>
       
@@ -598,11 +604,6 @@ export default function App() {
       <StudiesModal
         isOpen={isStudiesModalOpen}
         onClose={() => setIsStudiesModalOpen(false)}
-      />
-
-      <NoticesModal
-        isOpen={isNoticesModalOpen}
-        onClose={() => setIsNoticesModalOpen(false)}
       />
 
       <DictionaryModal

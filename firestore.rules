@@ -46,6 +46,25 @@ service cloud.firestore {
              data.updatedAt is number;
     }
 
+    function isValidChurchBanner(data) {
+      return data.keys().hasAll(['title', 'imageUrl', 'active', 'createdAt', 'updatedAt']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.imageUrl is string && data.imageUrl.size() <= 1000000 &&
+             (!data.keys().hasAny(['linkUrl']) || (data.linkUrl == null || (data.linkUrl is string && data.linkUrl.size() <= 1000))) &&
+             data.active is bool &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidChurchPost(data) {
+      return data.keys().hasAll(['mediaUrl', 'mediaType', 'createdAt', 'updatedAt']) &&
+             (!data.keys().hasAny(['description']) || (data.description == null || (data.description is string && data.description.size() <= 2000))) &&
+             data.mediaUrl is string && data.mediaUrl.size() <= 1048487 &&
+             data.mediaType is string && data.mediaType.size() <= 10 &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
     function isValidUser(data) {
       return data.keys().hasAll(['uid']) &&
              data.uid is string && data.uid.size() <= 128 &&
@@ -92,6 +111,22 @@ service cloud.firestore {
     }
 
     // Routes
+    match /churchPosts/{postId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(postId) && isValidChurchPost(request.resource.data);
+      allow update: if isAdmin() && isValidChurchPost(request.resource.data) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['description', 'mediaUrl', 'mediaType', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /churchBanners/{bannerId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(bannerId) && isValidChurchBanner(request.resource.data);
+      allow update: if isAdmin() && isValidChurchBanner(request.resource.data) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'imageUrl', 'linkUrl', 'active', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
     match /churchEvents/{eventId} {
       allow read: if true;
       allow create: if isAdmin() && isValidId(eventId) && isValidChurchEvent(request.resource.data);

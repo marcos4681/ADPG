@@ -101,9 +101,44 @@
         "updatedAt": { "type": "integer" }
       },
       "required": ["title", "description", "createdAt", "updatedAt"]
+    },
+    "ChurchBanner": {
+      "title": "Church Banner",
+      "description": "A banner image for announcements",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "linkUrl": { "type": "string", "format": "uri" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "integer" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["title", "imageUrl", "active", "createdAt", "updatedAt"]
+    },
+    "ChurchPost": {
+      "title": "Church Post",
+      "description": "A post with photo or video from events",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string" },
+        "createdAt": { "type": "integer" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["mediaUrl", "mediaType", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
+    "churchPosts/{postId}": {
+      "schema": "ChurchPost",
+      "description": "Global list of church posts"
+    },
+    "churchBanners/{bannerId}": {
+      "schema": "ChurchBanner",
+      "description": "Global list of church banners"
+    },
     "churchEvents/{eventId}": {
       "schema": "ChurchEvent",
       "description": "Global list of church events"
