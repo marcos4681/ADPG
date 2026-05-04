@@ -18,7 +18,7 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenLogin: () => void;
-  onStudiesToggle?: () => void;
+  onGoStudies?: () => void;
   onGoHome?: () => void;
   onGoBible?: () => void;
   onOpenVideoModal?: () => void;
@@ -26,7 +26,7 @@ interface SidebarProps {
   onTestamentClick?: (testament: 'Antigo' | 'Novo') => void;
 }
 
-export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onStudiesToggle, onGoHome, onGoBible, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
+export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onGoStudies, onGoHome, onGoBible, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -88,7 +88,7 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
             <div className="space-y-1">
               <button
                 onClick={() => {
-                  onStudiesToggle?.();
+                  onGoStudies?.();
                   if (window.innerWidth < 1024) onClose();
                 }}
                 className="w-full flex items-center justify-between p-3 bg-app-accent/10 hover:bg-app-accent/20 text-app-accent rounded-xl transition-all group"

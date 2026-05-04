@@ -14,7 +14,7 @@ import { db } from './lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import SearchModal from './components/SearchModal';
 import SettingsModal from './components/SettingsModal';
-import StudiesModal from './components/StudiesModal';
+import StudiesView from './components/StudiesView';
 import HomeView from './components/HomeView';
 import DictionaryModal from './components/DictionaryModal';
 import QuickSelectorModal from './components/QuickSelectorModal';
@@ -42,8 +42,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-  const [isStudiesModalOpen, setIsStudiesModalOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'home' | 'bible'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'bible' | 'studies'>('home');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -452,7 +451,7 @@ export default function App() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           onOpenLogin={() => setIsLoginModalOpen(true)}
-          onStudiesToggle={() => setIsStudiesModalOpen(true)}
+          onGoStudies={() => setCurrentView('studies')}
           onGoHome={() => setCurrentView('home')}
           onGoBible={() => setCurrentView('bible')}
           onOpenVideoModal={() => setIsVideoModalOpen(true)}
@@ -526,6 +525,8 @@ export default function App() {
           )}
           {currentView === 'home' ? (
             <HomeView />
+          ) : currentView === 'studies' ? (
+            <StudiesView />
           ) : (
             <Reader
               verses={verses}
@@ -549,6 +550,10 @@ export default function App() {
             onNextChapter={goToNextChapter}
             onPrevChapter={goToPrevChapter}
             onOpenQuickSelector={() => setIsQuickSelectorOpen(true)}
+            onTestamentSelect={(testament) => {
+              setSelectedTestamentFilter(testament);
+              setIsQuickSelectorOpen(true);
+            }}
             onWordSelect={(word, context) => {
               setDictionaryWord(word);
               setDictionaryContext(context);
@@ -599,11 +604,6 @@ export default function App() {
         currentBook={currentBook}
         currentChapter={currentChapter}
         testamentFilter={selectedTestamentFilter}
-      />
-
-      <StudiesModal
-        isOpen={isStudiesModalOpen}
-        onClose={() => setIsStudiesModalOpen(false)}
       />
 
       <DictionaryModal

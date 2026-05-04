@@ -31,6 +31,7 @@ interface ReaderProps {
   onNextChapter: () => void;
   onPrevChapter: () => void;
   onOpenQuickSelector?: () => void;
+  onTestamentSelect?: (testament: 'Antigo' | 'Novo') => void;
   onWordSelect?: (word: string, context?: string) => void;
 }
 
@@ -92,6 +93,7 @@ export default function Reader({
   onNextChapter,
   onPrevChapter,
   onOpenQuickSelector,
+  onTestamentSelect,
   onWordSelect
 }: ReaderProps) {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -288,24 +290,35 @@ export default function Reader({
     >
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Chapter Header */}
-        <header 
-          onClick={() => onOpenQuickSelector?.()}
-          className="text-center space-y-2 mb-12 border-b border-app-border pb-8 cursor-pointer group hover:bg-app-accent/5 transition-colors rounded-3xl -mx-4 px-4 sm:mx-0 sm:px-0"
-        >
+        <header className="text-center space-y-2 mb-12 border-b border-app-border pb-8 rounded-3xl -mx-4 px-4 sm:mx-0 sm:px-0">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center"
           >
-            <span className="text-[10px] font-bold text-app-taupe uppercase tracking-[0.3em] flex items-center gap-2">
-              {currentBook.testament} Testamento
-            </span>
+            <div className="flex gap-2 sm:gap-4 mb-4">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onTestamentSelect?.('Antigo'); }}
+                className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] px-3 py-1.5 rounded-full border transition-colors ${currentBook.testament === 'Antigo' ? 'bg-app-accent text-white border-app-accent' : 'border-app-border text-app-taupe hover:border-app-accent hover:text-app-accent'}`}
+              >
+                Antigo Testamento
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onTestamentSelect?.('Novo'); }}
+                className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] px-3 py-1.5 rounded-full border transition-colors ${currentBook.testament === 'Novo' ? 'bg-app-accent text-white border-app-accent' : 'border-app-border text-app-taupe hover:border-app-accent hover:text-app-accent'}`}
+              >
+                Novo Testamento
+              </button>
+            </div>
             
-            <div className="flex items-center justify-center gap-2 mt-2">
+            <div 
+              className="flex items-center justify-center gap-2 mt-2 cursor-pointer group p-2 hover:bg-app-accent/5 rounded-xl transition-colors"
+              onClick={() => onOpenQuickSelector?.()}
+            >
               <h1 className="text-4xl md:text-5xl font-serif font-bold text-app-accent group-hover:text-app-accent/80 transition-colors">
                 {currentBook.name} {currentChapter}
               </h1>
-              <ChevronDown size={28} className="text-app-taupe opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0" />
+              <ChevronDown size={28} className="text-app-taupe opacity-50 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0" />
             </div>
 
             {chapterTitle && (
@@ -313,9 +326,9 @@ export default function Reader({
                 {chapterTitle}
               </p>
             )}
-            <div className="w-12 h-1 bg-app-accent mx-auto mt-4 rounded-full opacity-20 group-hover:opacity-40 transition-opacity" />
-            <p className="text-[10px] text-app-taupe/60 uppercase tracking-widest mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              Clique para mudar de livro ou capítulo
+            <div className="w-12 h-1 bg-app-accent mx-auto mt-4 rounded-full opacity-20" />
+            <p className="text-[10px] text-app-taupe/60 uppercase tracking-widest mt-4">
+              Clique no título para mudar de livro ou capítulo
             </p>
           </motion.div>
         </header>

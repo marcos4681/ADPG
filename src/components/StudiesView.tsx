@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, BookOpen, ChevronRight, ArrowLeft } from 'lucide-react';
-
-interface StudiesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { BookOpen, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const studies = [
   {
@@ -242,113 +236,101 @@ const studies = [
   }
 ];
 
-export default function StudiesModal({ isOpen, onClose }: StudiesModalProps) {
+export default function StudiesView() {
   const [selectedStudy, setSelectedStudy] = useState<(typeof studies)[0] | null>(null);
 
-  if (!isOpen) return null;
-
-  const handleClose = () => {
-    setSelectedStudy(null);
-    onClose();
-  };
+  // Scroll para o topo quando abrir um estudo
+  if (selectedStudy) {
+    window.scrollTo(0, 0);
+  }
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-2xl max-h-[85vh] bg-app-bg border border-app-border rounded-2xl shadow-xl flex flex-col overflow-hidden"
-        >
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-app-border">
-            {selectedStudy ? (
-              <button
-                onClick={() => setSelectedStudy(null)}
-                className="flex items-center gap-2 text-app-taupe hover:text-app-accent transition-colors font-semibold"
-              >
-                <ArrowLeft size={20} />
-                Voltar aos Estudos
-              </button>
-            ) : (
-              <h2 className="text-xl font-serif font-bold text-app-accent flex items-center gap-2">
-                <BookOpen size={24} />
-                Estudos Bíblicos
-              </h2>
-            )}
-            <button
-              onClick={handleClose}
-              className="p-2 text-app-taupe hover:text-app-accent hover:bg-app-sidebar rounded-full transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
-            {selectedStudy ? (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="flex items-center gap-2 mb-4">
-                  {selectedStudy.tags.map(tag => (
-                    <span key={tag} className="text-[10px] font-bold uppercase tracking-wider text-white bg-app-accent px-2 py-0.5 rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                  <span className="text-xs text-app-taupe ml-auto">{selectedStudy.readTime}</span>
-                </div>
-                <h1 className="text-2xl font-bold font-serif text-app-accent mb-6 leading-tight pb-4 border-b border-app-border">
-                  {selectedStudy.title}
-                </h1>
-                <div className="text-[15px] leading-relaxed">
-                  {selectedStudy.content}
-                </div>
-              </div>
-            ) : (
-              <div className="animate-in fade-in slide-in-from-left-4 duration-300">
-                <p className="text-app-taupe text-sm mb-6">
-                  Aprofunde-se na Palavra de Deus com nossos estudos temáticos elaborados para fortalecer a sua fé e entendimento cristão.
-                </p>
-
-                <div className="grid grid-cols-1 gap-4">
-                  {studies.map((study) => (
-                    <div 
-                      key={study.id}
-                      onClick={() => setSelectedStudy(study)}
-                      className="bg-app-sidebar border border-app-border p-5 rounded-xl hover:border-app-accent transition-colors cursor-pointer group flex flex-col h-full"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex gap-2">
-                            {study.tags.map(tag => (
-                              <span key={tag} className="text-[10px] font-bold uppercase tracking-wider text-white bg-app-accent px-2 py-0.5 rounded-full">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                          <span className="text-[10px] text-app-taupe">{study.readTime}</span>
-                        </div>
-                        <h3 className="font-bold text-base text-app-accent mb-2 group-hover:underline">{study.title}</h3>
-                        <p className="text-sm text-app-text/80 line-clamp-2 leading-relaxed">
-                          {study.description}
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-app-border flex items-center justify-between text-app-accent font-semibold text-xs uppercase tracking-wider group-hover:gap-2 transition-all">
-                        <span>Ler Estudo</span>
-                        <ChevronRight size={14} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="mt-8 p-5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
-                  <h4 className="font-bold text-blue-600 mb-2">Mais estudos em breve!</h4>
-                  <p className="text-xs text-app-taupe">Estamos preparando novos conteúdos para abençoar sua vida.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </motion.div>
+    <div className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto p-4 sm:p-6 scrollbar-thin">
+      <div className="flex flex-col items-center mb-8 pb-8 border-b border-app-border relative">
+        <img 
+          src="/logo.png" 
+          alt="Logo ADPG" 
+          className="w-full max-w-[200px] h-auto object-contain drop-shadow-md"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }} 
+        />
+        <h1 className="text-xl sm:text-2xl mt-4 font-serif font-bold text-app-accent text-center">Estudos Bíblicos</h1>
       </div>
-    </AnimatePresence>
+
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin">
+        {selectedStudy ? (
+          <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+            <button 
+              onClick={() => setSelectedStudy(null)}
+              className="flex items-center gap-2 text-app-taupe hover:text-app-text mb-6 group transition-colors"
+            >
+              <div className="bg-app-sidebar p-1.5 rounded-lg group-hover:bg-app-accent group-hover:text-white transition-colors">
+                <ArrowLeft size={16} />
+              </div>
+              <span className="text-sm font-semibold">Voltar para Estudos</span>
+            </button>
+            <div className="flex gap-2 mb-4">
+              {selectedStudy.tags.map(tag => (
+                <span key={tag} className="text-[10px] font-bold uppercase tracking-wider text-white bg-app-accent px-2 py-0.5 rounded-full">
+                  {tag}
+                </span>
+              ))}
+              <span className="text-[10px] text-app-taupe flex items-center ml-auto">
+                Leitura de {selectedStudy.readTime}
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold font-serif mb-6 text-app-text">
+              {selectedStudy.title}
+            </h1>
+            <div className="text-[15px] leading-relaxed">
+              {selectedStudy.content}
+            </div>
+          </div>
+        ) : (
+          <div className="animate-in fade-in slide-in-from-left-4 duration-300">
+            <p className="text-app-taupe text-sm mb-6">
+              Aprofunde-se na Palavra de Deus com nossos estudos temáticos elaborados para fortalecer a sua fé e entendimento cristão.
+            </p>
+
+            <div className="grid grid-cols-1 gap-4">
+              {studies.map((study) => (
+                <div 
+                  key={study.id}
+                  onClick={() => setSelectedStudy(study)}
+                  className="bg-app-sidebar border border-app-border p-5 rounded-xl hover:border-app-accent transition-colors cursor-pointer group flex flex-col h-full"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex gap-2">
+                        {study.tags.map(tag => (
+                          <span key={tag} className="text-[10px] font-bold uppercase tracking-wider text-white bg-app-accent px-2 py-0.5 rounded-full">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-app-taupe">{study.readTime}</span>
+                    </div>
+                    <h3 className="font-bold text-base text-app-accent mb-2 group-hover:underline">{study.title}</h3>
+                    <p className="text-sm text-app-text/80 line-clamp-2 leading-relaxed">
+                      {study.description}
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-app-border flex items-center justify-between text-app-accent font-semibold text-xs uppercase tracking-wider group-hover:gap-2 transition-all">
+                    <span>Ler Estudo</span>
+                    <ChevronRight size={14} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-8 p-5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
+              <h4 className="font-bold text-blue-600 mb-2">Mais estudos em breve!</h4>
+              <p className="text-xs text-app-taupe">Estamos preparando novos conteúdos para abençoar sua vida.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
