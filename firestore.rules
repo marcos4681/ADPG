@@ -11,6 +11,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'marcosnatalina@gmail.com';
+    }
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
@@ -20,6 +24,28 @@ service cloud.firestore {
     }
 
     // Entity validations
+    function isValidChurchEvent(data) {
+      return data.keys().hasAll(['title', 'type', 'date', 'description', 'createdAt', 'updatedAt']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.type is string && data.type.size() <= 100 &&
+             (!data.keys().hasAny(['icon']) || (data.icon == null || (data.icon is string && data.icon.size() <= 100))) &&
+             data.date is string && data.date.size() <= 100 &&
+             (!data.keys().hasAny(['time']) || (data.time == null || (data.time is string && data.time.size() <= 100))) &&
+             (!data.keys().hasAny(['location']) || (data.location == null || (data.location is string && data.location.size() <= 200))) &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidChurchNotice(data) {
+      return data.keys().hasAll(['title', 'description', 'createdAt', 'updatedAt']) &&
+             data.title is string && data.title.size() <= 200 &&
+             (!data.keys().hasAny(['date']) || (data.date == null || (data.date is string && data.date.size() <= 100))) &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
     function isValidUser(data) {
       return data.keys().hasAll(['uid']) &&
              data.uid is string && data.uid.size() <= 128 &&
@@ -66,6 +92,22 @@ service cloud.firestore {
     }
 
     // Routes
+    match /churchEvents/{eventId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(eventId) && isValidChurchEvent(request.resource.data);
+      allow update: if isAdmin() && isValidChurchEvent(request.resource.data) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'type', 'icon', 'date', 'time', 'location', 'description', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /churchNotices/{noticeId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(noticeId) && isValidChurchNotice(request.resource.data);
+      allow update: if isAdmin() && isValidChurchNotice(request.resource.data) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'date', 'description', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(request.resource.data);

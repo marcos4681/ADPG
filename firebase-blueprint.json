@@ -71,9 +71,47 @@
         "updatedAt": { "type": "integer" }
       },
       "required": ["userId", "book_id", "chapter", "verse", "color"]
+    },
+    "ChurchEvent": {
+      "title": "Church Event",
+      "description": "A church event or regular service",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "type": { "type": "string" },
+        "icon": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "integer" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["title", "type", "date", "description", "createdAt", "updatedAt"]
+    },
+    "ChurchNotice": {
+      "title": "Church Notice",
+      "description": "A notice or announcement",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "integer" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["title", "description", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
+    "churchEvents/{eventId}": {
+      "schema": "ChurchEvent",
+      "description": "Global list of church events"
+    },
+    "churchNotices/{noticeId}": {
+      "schema": "ChurchNotice",
+      "description": "Global list of church notices"
+    },
     "users/{userId}": {
       "schema": "User",
       "description": "Individual user documents"

@@ -19,12 +19,13 @@ interface SidebarProps {
   onClose: () => void;
   onOpenLogin: () => void;
   onStudiesToggle?: () => void;
+  onNoticesToggle?: () => void;
   onOpenVideoModal?: () => void;
   isLive?: boolean;
   onTestamentClick?: (testament: 'Antigo' | 'Novo') => void;
 }
 
-export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onStudiesToggle, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
+export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen, onClose, onOpenLogin, onStudiesToggle, onNoticesToggle, onOpenVideoModal, isLive = false, onTestamentClick }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -96,27 +97,48 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
         </div>
 
         <div className="px-4 pb-4 space-y-5">
-          {/* Estudos */}
+          {/* Estudos e Recursos */}
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">Recursos</p>
-            <button
-              onClick={() => {
-                onStudiesToggle?.();
-                if (window.innerWidth < 1024) onClose();
-              }}
-              className="w-full flex items-center justify-between p-3 bg-app-accent/10 hover:bg-app-accent/20 text-app-accent rounded-xl transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-app-accent text-white p-1.5 rounded-lg shadow-sm">
-                  <BookOpen size={16} />
+            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">Recursos da Igreja</p>
+            <div className="space-y-1">
+              <button
+                onClick={() => {
+                  onStudiesToggle?.();
+                  if (window.innerWidth < 1024) onClose();
+                }}
+                className="w-full flex items-center justify-between p-3 bg-app-accent/10 hover:bg-app-accent/20 text-app-accent rounded-xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-app-accent text-white p-1.5 rounded-lg shadow-sm">
+                    <BookOpen size={16} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold leading-tight">Estudos Bíblicos</span>
+                    <span className="text-[10px] opacity-70">Aprofunde-se na Palavra</span>
+                  </div>
                 </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-bold leading-tight">Estudos Bíblicos</span>
-                  <span className="text-[10px] opacity-70">Aprofunde-se na Palavra</span>
+                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              <button
+                onClick={() => {
+                  onNoticesToggle?.();
+                  if (window.innerWidth < 1024) onClose();
+                }}
+                className="w-full flex items-center justify-between p-3 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 rounded-xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-500 text-white p-1.5 rounded-lg shadow-sm">
+                    <Bell size={16} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold leading-tight">Avisos e Eventos</span>
+                    <span className="text-[10px] opacity-70">Confira a agenda e recados</span>
+                  </div>
                 </div>
-              </div>
-              <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
           </div>
 
           {/* Mídia & Ao Vivo */}

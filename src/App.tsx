@@ -15,6 +15,7 @@ import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy } from '
 import SearchModal from './components/SearchModal';
 import SettingsModal from './components/SettingsModal';
 import StudiesModal from './components/StudiesModal';
+import NoticesModal from './components/NoticesModal';
 import DictionaryModal from './components/DictionaryModal';
 import QuickSelectorModal from './components/QuickSelectorModal';
 import VideoModal from './components/VideoModal';
@@ -42,6 +43,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isStudiesModalOpen, setIsStudiesModalOpen] = useState(false);
+  const [isNoticesModalOpen, setIsNoticesModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -451,6 +453,7 @@ export default function App() {
           onClose={() => setIsSidebarOpen(false)}
           onOpenLogin={() => setIsLoginModalOpen(true)}
           onStudiesToggle={() => setIsStudiesModalOpen(true)}
+          onNoticesToggle={() => setIsNoticesModalOpen(true)}
           onOpenVideoModal={() => setIsVideoModalOpen(true)}
           isLive={isLive}
           onTestamentClick={(testament) => {
@@ -595,6 +598,11 @@ export default function App() {
       <StudiesModal
         isOpen={isStudiesModalOpen}
         onClose={() => setIsStudiesModalOpen(false)}
+      />
+
+      <NoticesModal
+        isOpen={isNoticesModalOpen}
+        onClose={() => setIsNoticesModalOpen(false)}
       />
 
       <DictionaryModal
