@@ -115,7 +115,7 @@ export default function AiAssistant({ currentReference, initialPrompt, fontSize 
       {/* Floating Toggle */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-app-accent text-white rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transition-all z-50 hover:scale-110 active:scale-95"
+        className="fixed bottom-6 left-4 sm:left-6 w-14 h-14 bg-app-accent text-white rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transition-all z-50 hover:scale-110 active:scale-95"
         id="ai-assistant-toggle"
       >
         <Sparkles size={24} />
@@ -127,7 +127,7 @@ export default function AiAssistant({ currentReference, initialPrompt, fontSize 
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-24 right-6 w-[90vw] max-w-md h-[70vh] bg-app-bg rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-app-border transition-colors duration-300"
+            className="fixed bottom-24 left-4 sm:left-6 w-[90vw] max-w-md h-[70vh] bg-app-bg rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-app-border transition-colors duration-300"
             id="ai-assistant-panel"
           >
             {/* Header */}

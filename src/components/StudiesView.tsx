@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { BookOpen, ChevronRight, ArrowLeft } from 'lucide-react';
 
+import Logo from './Logo';
+
 const studies = [
   {
     id: 1,
@@ -245,20 +247,25 @@ export default function StudiesView() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto p-4 sm:p-6 scrollbar-thin">
-      <div className="flex flex-col items-center mb-8 pb-8 border-b border-app-border relative">
-        <img 
-          src="/logo.png" 
-          alt="Logo ADPG" 
-          className="w-full max-w-[200px] h-auto object-contain drop-shadow-md"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }} 
-        />
-        <h1 className="text-xl sm:text-2xl mt-4 font-serif font-bold text-app-accent text-center">Estudos Bíblicos</h1>
-      </div>
+    <div className="flex-1 overflow-y-auto w-full p-4 sm:p-6 lg:p-8 scrollbar-thin scrollbar-thumb-app-border scrollbar-track-transparent">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col items-center mb-8 pb-8 border-b border-app-border relative">
+          <img 
+            src="/logo.png" 
+            alt="Logo ADPG" 
+            className="w-full max-w-[280px] h-auto object-contain drop-shadow-md"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              document.getElementById('studies-text-logo')!.style.display = 'flex';
+            }} 
+          />
+          <div id="studies-text-logo" className="w-full flex-col items-center mt-2" style={{ display: 'none' }}>
+            <Logo />
+          </div>
+          <h1 className="text-xl sm:text-2xl mt-4 font-serif font-bold text-app-accent text-center">Estudos Bíblicos</h1>
+        </div>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin">
+        <div className="flex-1 scrollbar-thin">
         {selectedStudy ? (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300">
             <button 
@@ -330,6 +337,7 @@ export default function StudiesView() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

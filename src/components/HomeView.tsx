@@ -50,6 +50,8 @@ const ICONS: Record<string, React.ReactNode> = {
   Calendar: <Calendar size={18} />
 };
 
+import Logo from './Logo';
+
 export default function HomeView() {
   const { user } = useAuth();
   const isAdmin = user?.email === 'marcosnatalina@gmail.com';
@@ -369,20 +371,25 @@ export default function HomeView() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto p-4 sm:p-6 scrollbar-thin">
-      <div className="flex flex-col items-center mb-8 pb-8 border-b border-app-border relative">
-        <img 
-          src="/logo.png" 
-          alt="Logo ADPG" 
-          className="w-full max-w-[200px] h-auto object-contain drop-shadow-md"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }} 
-        />
-        <h1 className="text-xl sm:text-2xl mt-4 font-serif font-bold text-app-accent text-center">Mural de Recados, Avisos e Eventos</h1>
-      </div>
+    <div className="flex-1 overflow-y-auto w-full p-4 sm:p-6 lg:p-8 scrollbar-thin scrollbar-thumb-app-border scrollbar-track-transparent">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex flex-col items-center mb-8 pb-8 border-b border-app-border relative">
+          <img 
+            src="/logo.png" 
+            alt="Logo ADPG" 
+            className="w-full max-w-[280px] h-auto object-contain drop-shadow-md"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              document.getElementById('home-text-logo')!.style.display = 'flex';
+            }} 
+          />
+          <div id="home-text-logo" className="w-full flex-col items-center mt-2" style={{ display: 'none' }}>
+            <Logo />
+          </div>
+          <h1 className="text-xl sm:text-2xl mt-4 font-serif font-bold text-app-accent text-center">Mural de Recados, Avisos e Eventos</h1>
+        </div>
 
-      {isLoading ? (
+        {isLoading ? (
               <div className="flex flex-col items-center justify-center h-full text-app-taupe gap-4">
                 <Loader2 className="animate-spin" size={32} />
                 <p>Carregando...</p>
@@ -926,6 +933,7 @@ export default function HomeView() {
 
               </div>
             )}
+      </div>
     </div>
   );
 }
