@@ -392,6 +392,7 @@ export default function StudiesView() {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [newVideoUrl, setNewVideoUrl] = useState('');
   const [newContent, setNewContent] = useState('');
   const [newReadTime, setNewReadTime] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -442,6 +443,7 @@ export default function StudiesView() {
         description: newDescription.trim() || null,
         content: newContent.trim(),
         imageUrl: newImageUrl.trim() || null,
+        videoUrl: newVideoUrl.trim() || null,
         readTime: newReadTime.trim() || null,
         updatedAt: Date.now()
       };
@@ -460,6 +462,7 @@ export default function StudiesView() {
       setNewTitle('');
       setNewDescription('');
       setNewImageUrl('');
+      setNewVideoUrl('');
       setNewContent('');
       setNewReadTime('');
     } catch (error) {
@@ -477,6 +480,7 @@ export default function StudiesView() {
     setNewDescription(study.description || '');
     setNewContent(study.content || '');
     setNewImageUrl(study.imageUrl || '');
+    setNewVideoUrl(study.videoUrl || '');
     setNewReadTime(study.readTime || '');
     setIsCreating(true);
     setSelectedStudy(null);
@@ -636,6 +640,25 @@ export default function StudiesView() {
                 </div>
               </div>
             )}
+
+            {selectedStudy.videoUrl && (
+              <div className="mt-12 pt-8 border-t border-app-border">
+                <h3 className="text-xl font-bold font-serif mb-6 text-app-accent flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  Vídeo do Estudo
+                </h3>
+                <div className="aspect-video w-full max-w-full rounded-xl overflow-hidden shadow-lg border border-app-border bg-app-sidebar flex justify-center items-center">
+                  <iframe 
+                    className="w-full h-full max-w-full overflow-hidden" 
+                    src={selectedStudy.videoUrl.includes('youtube.com') || selectedStudy.videoUrl.includes('youtu.be') ? `https://www.youtube.com/embed/${selectedStudy.videoUrl.includes('v=') ? selectedStudy.videoUrl.split('v=')[1]?.split('&')[0] : selectedStudy.videoUrl.split('/').pop()}` : selectedStudy.videoUrl} 
+                    title="Vídeo do Estudo" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            )}
           </div>
         ) : isCreating ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -719,6 +742,17 @@ export default function StudiesView() {
                       </div>
                     )}
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-app-text mb-1">Link de Vídeo do YouTube</label>
+                  <input 
+                    type="url" 
+                    value={newVideoUrl}
+                    onChange={(e) => setNewVideoUrl(e.target.value)}
+                    className="w-full bg-app-bg border border-app-border rounded-lg px-4 py-2 text-app-text focus:outline-none focus:border-app-accent transition-colors"
+                    placeholder="https://youtube.com/watch?v=..."
+                  />
                 </div>
 
                 <div>

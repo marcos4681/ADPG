@@ -117,6 +117,7 @@ service cloud.firestore {
              data.content is string && data.content.size() <= 50000 &&
              (!data.keys().hasAny(['readTime']) || (data.readTime == null || (data.readTime is string && data.readTime.size() <= 50))) &&
              (!data.keys().hasAny(['imageUrl']) || (data.imageUrl == null || (data.imageUrl is string && data.imageUrl.size() <= 2048))) &&
+             (!data.keys().hasAny(['videoUrl']) || (data.videoUrl == null || (data.videoUrl is string && data.videoUrl.size() <= 2048))) &&
              data.authorId is string && data.authorId.size() <= 128 &&
              data.createdAt is number &&
              data.updatedAt is number;
@@ -159,7 +160,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() && isValidId(studyId) && isValidPersonalStudy(request.resource.data) && request.resource.data.authorId == request.auth.uid;
       allow update: if isAdmin() && isValidPersonalStudy(request.resource.data) && 
-                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description', 'content', 'readTime', 'imageUrl', 'updatedAt']);
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description', 'content', 'readTime', 'imageUrl', 'videoUrl', 'updatedAt']);
       allow delete: if isAdmin();
     }
 
