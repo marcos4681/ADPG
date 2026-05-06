@@ -52,11 +52,23 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
   const testaments = ['Antigo', 'Novo'] as const;
 
   return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-40 bg-app-sidebar border-r border-app-border transform transition-all duration-300 ease-in-out lg:relative ${
-        isOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-0 overflow-hidden border-none'
-      }`}
-    >
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 bg-app-sidebar border-r border-app-border transform transition-all duration-300 ease-in-out lg:relative ${
+          isOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-0 overflow-hidden border-none cursor-default pointer-events-none lg:pointer-events-auto'
+        }`}
+      >
       <div className="h-full flex flex-col w-72">
         <div className="p-4 flex items-start justify-between relative">
           <div className="flex flex-col w-full pr-8">
@@ -117,7 +129,7 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
                     <Bell size={16} />
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-xs font-bold leading-tight">Mural de Recados, Avisos e Eventos</span>
+                    <span className="text-xs font-bold leading-tight">Mural de Avisos</span>
                     <span className="text-[10px] opacity-70">Acesse a Página Inicial</span>
                   </div>
                 </div>
@@ -148,7 +160,7 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
 
           {/* Mídia & Ao Vivo */}
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">TV & Rádio</p>
+            <p className="text-[10px] font-bold text-app-taupe uppercase tracking-widest px-2">Mídia & Ao Vivo</p>
             
             {/* TV ADPG Group */}
             <div className="flex flex-col gap-1 bg-red-600/5 border border-red-600/20 rounded-xl p-1.5">
@@ -280,5 +292,6 @@ export default function Sidebar({ currentBook, currentChapter, onSelect, isOpen,
         </div>
       </div>
     </aside>
+    </>
   );
 }

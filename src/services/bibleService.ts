@@ -108,8 +108,8 @@ export async function fetchChapter(bookApiId: string, chapter: number, selectedT
   // Priorizar a tradução selecionada pelo usuário
   let orderedTranslations = supportedTranslations;
   
-  // Special case: MNPG, blivre, or adpg seeks a literal base or generic text. We use 'almeida' for it until custom APIs are provided or AI translation is complete.
-  const effectiveTranslation = (selectedTranslation === 'mnpg' || selectedTranslation === 'blivre' || selectedTranslation === 'adpg') ? 'almeida' : selectedTranslation;
+  // Special case: MNPG, blivre, adpg, or king_james seeks a literal base or generic text. We use 'almeida' for it until custom APIs are provided or AI translation is complete.
+  const effectiveTranslation = (selectedTranslation === 'mnpg' || selectedTranslation === 'blivre' || selectedTranslation === 'adpg' || selectedTranslation === 'king_james') ? 'almeida' : selectedTranslation;
 
   if (effectiveTranslation && supportedTranslations.includes(effectiveTranslation)) {
     orderedTranslations = [effectiveTranslation];

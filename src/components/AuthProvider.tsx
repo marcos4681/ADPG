@@ -54,8 +54,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      if (error?.code === 'auth/popup-closed-by-user' || error?.message?.includes('auth/popup-closed-by-user')) {
+        throw new Error('O login do Google foi bloqueado pelo navegador. Por favor, acesse o app em uma nova aba ou use e-mail e senha.');
+      }
       throw error;
     }
   };

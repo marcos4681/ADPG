@@ -483,7 +483,7 @@ export default function Reader({
         {/* Footer info */}
         <div className="pt-16 pb-12 text-center border-t border-app-border">
           <p className="text-[10px] text-app-taupe font-sans font-bold tracking-[0.2em] uppercase">
-            {translation === 'mnpg' ? 'MNPG (Fiel aos Originais)' : translation === 'rccv' ? 'Almeida Revista e Corrigida' : 'Almeida Tradicional'} • ADPG Bíblia Digital
+            {translation === 'mnpg' ? 'MNPG (Fiel aos Originais)' : translation === 'king_james' ? 'King James Atualizada' : translation === 'rccv' ? 'Almeida Revista e Corrigida' : 'Almeida Tradicional'} • ADPG Bíblia Digital
           </p>
           {translation === 'mnpg' && (
             <p className="mt-2 text-[9px] text-app-accent font-bold uppercase tracking-wider">

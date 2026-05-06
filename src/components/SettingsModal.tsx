@@ -253,7 +253,8 @@ export default function SettingsModal({ isOpen, onClose, settings, onUpdateSetti
                   { id: 'rccv', label: 'Almeida Revista e Corrigida (ARC)' },
                   { id: 'mnpg', label: 'MNPG (Fiel aos Originais)', badge: 'Exclusiva' },
                   { id: 'blivre', label: 'Bíblia Livre' },
-                  { id: 'adpg', label: 'Tradução ADPG (IA - Linguagem Atual)', badge: 'Nova' }
+                  { id: 'adpg', label: 'Tradução ADPG (IA - Linguagem Atual)', badge: 'Nova' },
+                  { id: 'king_james', label: 'King James Atualizada (KJA)' }
                 ].map((tr) => (
                   <button
                     key={tr.id}

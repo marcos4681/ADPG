@@ -12,7 +12,7 @@
         "theme": { "type": "string", "enum": ["light", "dark"] },
         "fontSize": { "type": "string", "enum": ["small", "medium", "large", "extra-large"] },
         "chatFontSize": { "type": "string", "enum": ["small", "medium", "large"] },
-        "translation": { "type": "string", "enum": ["almeida", "rccv", "mnpg"] },
+        "translation": { "type": "string", "enum": ["almeida", "rccv", "mnpg", "blivre", "adpg", "king_james"] },
         "lineSpacing": { "type": "string", "enum": ["tight", "relaxed", "loose"] },
         "fontFamily": { "type": "string", "enum": ["sans", "serif", "mono"] },
         "textColor": { "type": "string", "enum": ["default", "blue", "rose", "emerald", "amber", "purple"] },
@@ -20,6 +20,22 @@
         "updatedAt": { "type": "integer" }
       },
       "required": ["uid", "email"]
+    },
+    "PersonalStudy": {
+      "title": "Personal Study",
+      "description": "User's personal study topic",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "content": { "type": "string" },
+        "readTime": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "integer" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["title", "content", "authorId", "createdAt", "updatedAt"]
     },
     "Study": {
       "title": "AI Study",
@@ -158,6 +174,10 @@
     "users/{userId}/highlights/{highlightId}": {
       "schema": "Highlight",
       "description": "User's verse highlights"
+    },
+    "personalStudies/{studyId}": {
+      "schema": "PersonalStudy",
+      "description": "User's personal studies"
     },
     "users/{userId}/studies/{studyId}": {
       "schema": "Study",

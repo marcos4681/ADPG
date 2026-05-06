@@ -43,7 +43,7 @@ export interface Settings {
   fontSize: 'small' | 'medium' | 'large' | 'extra-large';
   chatFontSize: 'small' | 'medium' | 'large';
   theme: 'dark' | 'light';
-  translation: 'almeida' | 'rccv' | 'mnpg' | 'blivre' | 'adpg';
+  translation: 'almeida' | 'rccv' | 'mnpg' | 'blivre' | 'adpg' | 'king_james';
   lineSpacing: 'tight' | 'relaxed' | 'loose';
   fontFamily?: 'sans' | 'serif' | 'mono';
   textColor?: 'default' | 'blue' | 'rose' | 'emerald' | 'amber' | 'purple';

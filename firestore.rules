@@ -12,7 +12,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email == 'marcosnatalina@gmail.com';
+      return isSignedIn() && (request.auth.uid == '5by2VEKnzuUwA07YTotLmxj40Zk2' || request.auth.token.email == 'marcosnatalina@gmail.com');
     }
 
     function isOwner(userId) {
@@ -74,7 +74,7 @@ service cloud.firestore {
              (!data.keys().hasAny(['theme']) || (data.theme in ['light', 'dark'])) &&
              (!data.keys().hasAny(['fontSize']) || (data.fontSize in ['small', 'medium', 'large', 'extra-large'])) &&
              (!data.keys().hasAny(['chatFontSize']) || (data.chatFontSize in ['small', 'medium', 'large'])) &&
-             (!data.keys().hasAny(['translation']) || (data.translation in ['almeida', 'rccv', 'mnpg', 'blivre', 'adpg'])) &&
+             (!data.keys().hasAny(['translation']) || (data.translation in ['almeida', 'rccv', 'mnpg', 'blivre', 'adpg', 'king_james'])) &&
              (!data.keys().hasAny(['lineSpacing']) || (data.lineSpacing in ['tight', 'relaxed', 'loose'])) &&
              (!data.keys().hasAny(['fontFamily']) || (data.fontFamily in ['sans', 'serif', 'mono'])) &&
              (!data.keys().hasAny(['textColor']) || (data.textColor in ['default', 'blue', 'rose', 'emerald', 'amber', 'purple'])) &&
@@ -107,6 +107,18 @@ service cloud.firestore {
       return data.keys().hasAll(['userId', 'messages', 'updatedAt']) &&
              data.userId == request.auth.uid &&
              data.messages is list &&
+             data.updatedAt is number;
+    }
+
+    function isValidPersonalStudy(data) {
+      return data.keys().hasAll(['title', 'content', 'authorId', 'createdAt', 'updatedAt']) &&
+             data.title is string && data.title.size() <= 200 &&
+             (!data.keys().hasAny(['description']) || (data.description == null || (data.description is string && data.description.size() <= 1000))) &&
+             data.content is string && data.content.size() <= 50000 &&
+             (!data.keys().hasAny(['readTime']) || (data.readTime == null || (data.readTime is string && data.readTime.size() <= 50))) &&
+             (!data.keys().hasAny(['imageUrl']) || (data.imageUrl == null || (data.imageUrl is string && data.imageUrl.size() <= 2048))) &&
+             data.authorId is string && data.authorId.size() <= 128 &&
+             data.createdAt is number &&
              data.updatedAt is number;
     }
 
@@ -143,6 +155,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /personalStudies/{studyId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(studyId) && isValidPersonalStudy(request.resource.data) && request.resource.data.authorId == request.auth.uid;
+      allow update: if isAdmin() && isValidPersonalStudy(request.resource.data) && 
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description', 'content', 'readTime', 'imageUrl', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
@@ -163,6 +183,7 @@ service cloud.firestore {
         allow update: if isOwner(userId) && isValidHighlight(request.resource.data);
         allow delete: if isOwner(userId);
       }
+
 
       match /studies/{studyId} {
         allow list: if isOwner(userId);

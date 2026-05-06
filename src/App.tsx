@@ -68,7 +68,7 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         // Validar tradução para evitar erros de versões não suportadas no passado
-        if (!['almeida', 'rccv', 'mnpg', 'blivre', 'adpg'].includes(parsed.translation)) {
+        if (!['almeida', 'rccv', 'mnpg', 'blivre', 'adpg', 'king_james'].includes(parsed.translation)) {
           parsed.translation = 'almeida';
         }
         // Ensure chatFontSize is set
@@ -476,7 +476,7 @@ export default function App() {
             onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
             onSearchToggle={() => setIsSearchModalOpen(true)}
             onFavoritesToggle={() => setIsFavoritesOpen(true)}
-            onStudiesToggle={() => setIsStudiesModalOpen(true)}
+            onStudiesToggle={() => setCurrentView('studies')}
             onSettingsToggle={() => setIsSettingsModalOpen(true)}
             onReadingModeToggle={() => setIsReadingMode(true)}
             onOpenVideoModal={() => setIsVideoModalOpen(true)}
