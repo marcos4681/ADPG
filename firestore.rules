@@ -111,15 +111,15 @@ service cloud.firestore {
     }
 
     function isValidPersonalStudy(data) {
-      return data.keys().hasAll(['title', 'content', 'authorId', 'createdAt', 'updatedAt']) &&
+      return data.keys().hasAll(['title', 'content', 'updatedAt']) &&
              data.title is string && data.title.size() <= 200 &&
              (!data.keys().hasAny(['description']) || (data.description == null || (data.description is string && data.description.size() <= 1000))) &&
              data.content is string && data.content.size() <= 50000 &&
              (!data.keys().hasAny(['readTime']) || (data.readTime == null || (data.readTime is string && data.readTime.size() <= 50))) &&
-             (!data.keys().hasAny(['imageUrl']) || (data.imageUrl == null || (data.imageUrl is string && data.imageUrl.size() <= 2048))) &&
+             (!data.keys().hasAny(['imageUrl']) || (data.imageUrl == null || (data.imageUrl is string && data.imageUrl.size() <= 1048576))) &&
              (!data.keys().hasAny(['videoUrl']) || (data.videoUrl == null || (data.videoUrl is string && data.videoUrl.size() <= 2048))) &&
-             data.authorId is string && data.authorId.size() <= 128 &&
-             data.createdAt is number &&
+             (!data.keys().hasAny(['authorId']) || (data.authorId is string && data.authorId.size() <= 128)) &&
+             (!data.keys().hasAny(['createdAt']) || (data.createdAt is number)) &&
              data.updatedAt is number;
     }
 
